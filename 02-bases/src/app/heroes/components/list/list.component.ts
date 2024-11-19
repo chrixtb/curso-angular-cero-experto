@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 export class ListComponent {
 
-  public heroNames: string[] = ['Spiderma', 'Ironman', 'Hulk'];
+  public heroNames: string[] = ['Spiderma', 'Ironman', 'Hulk', 'HawkEYe'];
   public deletedHero?: string;
 
   removeLastHero(): void {
