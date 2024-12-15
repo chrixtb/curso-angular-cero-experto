@@ -1,0 +1,23 @@
+<h4>Listado</h4>
+<ul class="list-group">
+  <li *ngFor="
+    let character of characterList;
+    let i = index;
+    even as isEven
+    last as isLast
+  "
+    class="list-group-item"
+    [ngClass]="{
+      'list-group-item-primary': isEven,
+      'list-group-item-dark': isLast
+    }">
+
+    <span class="text-primary"> {{i + 1}}. </span>
+    <span>{{character.name}} - </span>
+    <strong>Power: </strong>
+    <span>{{character.power}}</span>
+
+    <span *ngIf="i === 0"> Es el primero!!</span>
+  </li>
+
+</ul>
