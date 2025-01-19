@@ -7,6 +7,7 @@ import { Character } from '../../interfaces/character.interface';
   styleUrl: './main-page.component.css'
 })
 export class MainPageComponent {
+
   public characters: Character[] = [
     {
       name: 'Krilling',
@@ -24,5 +25,9 @@ export class MainPageComponent {
 
   onNewCharacter(character: Character): void {
     this.characters.push(character);
+  }
+
+  onDelete(index: number) {
+    this.characters.splice(index,1)
   }
 }

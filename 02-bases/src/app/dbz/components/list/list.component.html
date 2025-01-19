@@ -6,18 +6,21 @@
     even as isEven
     last as isLast
   "
-    class="list-group-item"
+    class="list-group-item d-flex justify-content-between align-items-center"
     [ngClass]="{
       'list-group-item-primary': isEven,
       'list-group-item-dark': isLast
     }">
 
-    <span class="text-primary"> {{i + 1}}. </span>
-    <span>{{character.name}} - </span>
-    <strong>Power: </strong>
-    <span>{{character.power}}</span>
+    <div>
+      <span class="text-primary"> {{i + 1}}. </span>
+      <span>{{character.name}} - </span>
+      <strong>Power: </strong>
+      <span>{{character.power}}</span>
 
-    <span *ngIf="i === 0"> Es el primero!!</span>
+      <span *ngIf="i === 0"> Es el primero!!</span>
+    </div>
+    <button class="btn btn-danger" (click)="onDeleteCharacter(i)">X</button>
   </li>
 
 </ul>
