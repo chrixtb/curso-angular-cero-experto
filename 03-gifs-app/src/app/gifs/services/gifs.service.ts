@@ -1,68 +1,95 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Gif, SearchResponse } from "../interfaces/gifs.interfaces";
 
-@Injectable({providedIn: 'root'})
-export class GifsService {
+import { HttpClient} from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { GiphyResponse } from '../interfaces/giphy.interfaces';
+import { environment } from '@environments/environment';
+import { GifMapper } from '../mapper/gif.mapper';
+import { Gif } from '../interfaces/gif.interface';
+import { map, tap } from 'rxjs';
 
-    private apiKey: string = "y85ja9mwvEU2HOMxHv3QnwiT2aKaoXCe";
-    private serviceUrl: string = "https://api.giphy.com/v1/gifs";
+@Injectable({
+  providedIn: 'root'
+})
+export class GifService {
+
+    http= inject(HttpClient);
     
-    private _tagsHistory: string[] = [];
+    searchHistory = signal<Record<string,Gif[]>>({})
+    searchHistoryKeys = computed(() => Object.keys(this.searchHistory()))
 
-    public gifList: Gif[] = [];
-
-    constructor(private http: HttpClient){
-        this.loadLocalStorage()
-     }
-
-    get tagsHistory(){
-        // Operador spread para devolver copia. Los arrays se pasan por referencia.
-        return [...this._tagsHistory];
+    trendingGifs = signal<Gif[]>([])
+    trendingGifsLoading = signal(true)
+    
+    constructor() {
+        this.loadTrendingGifs();
+    }
+   
+    loadTrendingGifs(){
+        this.http.get<GiphyResponse>(`${environment.giphyUrl}/gifs/trending`, {
+            params: {
+                api_key: environment.giphyApiKey,
+                limit: 20
+            }
+        }).subscribe( (resp) => {
+            const gifs = GifMapper.mapGiphyItemsToGifArray(resp.data);
+            this.trendingGifs.set(gifs);
+            console.log(gifs)
+            this.trendingGifsLoading.set(false);
+        })
     }
 
-    private organizeHistory(tag: string){
-        tag = tag.toLowerCase();
+    searchGifs(query: string) {
+        if(query.length === 0) return;
 
-        if(this._tagsHistory.includes(tag) ){
-            this._tagsHistory= this._tagsHistory.filter( oldTag => oldTag !== tag);
-        }
+        //this.organizeHistory(query)
 
-        this._tagsHistory.unshift(tag);
-        this._tagsHistory = this._tagsHistory.splice(0,10);
-
-        this.saveLocalStorage()
+        return this.http.get<GiphyResponse>(`${environment.giphyUrl}/gifs/search`, {
+            params: {
+                api_key: environment.giphyApiKey,
+                limit: 20,
+                q: query,
+            }
+        }).pipe(
+            map( ({data}) => data ),
+            map( (items) => GifMapper.mapGiphyItemsToGifArray(items)),
+            tap( items => {
+                this.searchHistory.update( history => ({
+                    ...history,
+                    [query.toLocaleLowerCase()]: items,
+                }))
+            })
+        );
     }
 
-    private saveLocalStorage(): void {
-        localStorage.setItem('history', JSON.stringify(this._tagsHistory));
-    }
+   
+    // private organizeHistory(tag: string){
+    //     tag = tag.toLowerCase();
 
-    private loadLocalStorage(): void {
-        const temporal = localStorage.getItem('history');
-        if(!temporal) return;
+    //     if(this._tagsHistory.includes(tag) ){
+    //         this._tagsHistory= this._tagsHistory.filter( oldTag => oldTag !== tag);
+    //     }
+
+    //     this._tagsHistory.unshift(tag);
+    //     this._tagsHistory = this._tagsHistory.splice(0,10);
+
+    //     this.saveLocalStorage()
+    // }
+
+    // private saveLocalStorage(): void {
+    //     localStorage.setItem('history', JSON.stringify(this._tagsHistory));
+    // }
+
+    // private loadLocalStorage(): void {
+    //     const temporal = localStorage.getItem('history');
+    //     if(!temporal) return;
             
-        this._tagsHistory = JSON.parse(temporal);
+    //     this._tagsHistory = JSON.parse(temporal);
 
-        if(this._tagsHistory.length > 0){
-            this.searchTag(this._tagsHistory[0])
-        }
-    }
+    //     if(this._tagsHistory.length > 0){
+    //         this.searchTag(this._tagsHistory[0])
+    //     }
+    // }
 
-    searchTag(tag: string): void {
-        if(tag.length === 0) return;
-        this.organizeHistory(tag)
-
-        const params = new HttpParams()
-            .set('api_key', this.apiKey)
-            .set('limit', 10)
-            .set('q', tag);
-
-        this.http.get<SearchResponse>(`${this.serviceUrl}/search?`, {params})
-            .subscribe(resp => {
-                this.gifList = resp.data;
-            });
-    }
-
+    
 
 }
