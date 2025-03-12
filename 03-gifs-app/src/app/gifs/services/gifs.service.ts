@@ -1,11 +1,13 @@
 
 import { HttpClient} from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { GiphyResponse } from '../interfaces/giphy.interfaces';
 import { environment } from '@environments/environment';
 import { GifMapper } from '../mapper/gif.mapper';
 import { Gif } from '../interfaces/gif.interface';
-import { map, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
+
+const LOCAL_STORAGE_HISTORY_KEY = 'history';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +16,7 @@ export class GifService {
 
     http= inject(HttpClient);
     
-    searchHistory = signal<Record<string,Gif[]>>({})
+    searchHistory = signal<Record<string,Gif[]>>(this.loadFromLocalStorage())
     searchHistoryKeys = computed(() => Object.keys(this.searchHistory()))
 
     trendingGifs = signal<Gif[]>([])
@@ -22,7 +24,12 @@ export class GifService {
     
     constructor() {
         this.loadTrendingGifs();
+        //this.loadLocalStorage();
     }
+
+    saveGifsToLocalStorage = effect( () => {
+        localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(this.searchHistory()));localStorage.setItem('history', JSON.stringify(this.searchHistory()));
+    });
    
     loadTrendingGifs(){
         this.http.get<GiphyResponse>(`${environment.giphyUrl}/gifs/trending`, {
@@ -33,13 +40,13 @@ export class GifService {
         }).subscribe( (resp) => {
             const gifs = GifMapper.mapGiphyItemsToGifArray(resp.data);
             this.trendingGifs.set(gifs);
-            console.log(gifs)
+            //console.log(gifs)
             this.trendingGifsLoading.set(false);
         })
     }
 
-    searchGifs(query: string) {
-        if(query.length === 0) return;
+    searchGifs(query: string) : Observable<Gif[]> {
+        // if(query.length === 0) return;
 
         //this.organizeHistory(query)
 
@@ -57,10 +64,14 @@ export class GifService {
                     ...history,
                     [query.toLocaleLowerCase()]: items,
                 }))
+                this.saveLocalStorage()
             })
         );
     }
 
+    getHistoryGifs(query: string) : Gif[] {
+        return this.searchHistory()[query] ?? [];
+    }
    
     // private organizeHistory(tag: string){
     //     tag = tag.toLowerCase();
@@ -75,21 +86,26 @@ export class GifService {
     //     this.saveLocalStorage()
     // }
 
-    // private saveLocalStorage(): void {
-    //     localStorage.setItem('history', JSON.stringify(this._tagsHistory));
-    // }
+    private saveLocalStorage(): void {
+        localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(this.searchHistory()));
+    }
 
-    // private loadLocalStorage(): void {
-    //     const temporal = localStorage.getItem('history');
-    //     if(!temporal) return;
-            
-    //     this._tagsHistory = JSON.parse(temporal);
+    private loadlocalStorage(): void {
+        const temporal = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
+        if(!temporal) return;
+        
+        console.log(JSON.parse(temporal))
+        this.searchHistory.set(JSON.parse(temporal));
+    }
 
-    //     if(this._tagsHistory.length > 0){
-    //         this.searchTag(this._tagsHistory[0])
-    //     }
-    // }
+    private loadFromLocalStorage(): Record<string,Gif[]> {
+        const gifsFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
+        if(!gifsFromLocalStorage) return {};
+        
+        const gifs = JSON.parse(gifsFromLocalStorage)
+        console.log(gifs);
 
-    
+        return gifs;
+    }
 
 }
