@@ -1,0 +1,32 @@
+<article class="mx-10">
+    <header class="w-screen flex flex-row gap-5 mb-4" >
+        <div class="avatar">
+            <div class="w-40 rounded-xl">
+                <img [src]="country().flagSvg" />
+            </div>
+        </div>
+        <div class="flex flex-col gap-3">
+            <h1 class="text-8xl">{{country().name}} </h1>
+            <h2 class="text-2xl">Capital: {{country().capital}} </h2>
+        </div>
+    </header>
+
+    <section class="stats shadow">
+        <div class="stat place-items-center">
+            <div class="stat-title">Poblacion</div>
+            <div class="stat-value">{{country().population| number }}</div>
+        </div>
+
+        <div class="stat place-items-center">
+            <div class="stat-title">Región</div>
+            <div class="stat-value text-secondary">{{country().subregion }}</div>
+            <div class="stat-desc text-secondary">{{country().region }}</div>
+        </div>
+
+        <div class="stat place-items-center">
+            <div class="stat-title">Codigo País</div>
+            <div class="stat-value">{{country().flag}}</div>
+        </div>
+    </section>
+
+</article>
