@@ -1,1 +1,17 @@
-<country-list />
+<section class="row flex flex-row gap-2">
+    @for (region of regions; track $index) {
+        <button class="btn btn-outline w-[100px]" 
+        (click)="selectedRegion.set(region)"
+        [class.btn-primary]="selectedRegion() === region" 
+        > 
+            {{region}} 
+        </button>
+    }
+</section>
+
+<country-list 
+    [countries]="countryResource.value() ?? []"
+    [isLoading]="countryResource.isLoading()"
+    [isEmpty]="countryResource.value()?.length === 0"
+    [errorMessage]="countryResource.error()"
+/>
