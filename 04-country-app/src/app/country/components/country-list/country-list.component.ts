@@ -1,13 +1,16 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
+import { RESTCountry } from '../../interfaces/rest-countries.iterface';
+import { Country } from '../../interfaces/country.interface';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'country-list',
-    imports: [],
+    imports: [DecimalPipe],
     templateUrl: './country-list.component.html',
 })
 export class CountryListComponent {
 
-    @Input() countries: string = '';
+    countries = input.required<Country[]>();
 
 }
  
