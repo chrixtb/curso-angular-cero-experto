@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, input, output, Output, signal } from '@angular/core';
+import { Component, effect, EventEmitter, input, linkedSignal, output, Output, signal } from '@angular/core';
 
 @Component({
     selector: 'country-search-input',
@@ -6,12 +6,14 @@ import { Component, effect, EventEmitter, input, output, Output, signal } from '
     templateUrl: './country-search-input.component.html',
 })
 export class CountrySearchInputComponent {
-    
-    placeholder = input<string>('Buscar');
-    value = output<string>();
-    debounceTime = input(300);
 
-    inputValue = signal<string>('')
+    placeholder = input<string>('Buscar');
+    debounceTime = input(1000);
+    initialValue = input<string>('');
+
+    value = output<string>();
+
+    inputValue = linkedSignal<string>(() => this.initialValue());
 
     debounceEffect = effect((onCleanup) => {
         const value = this.inputValue();
@@ -28,6 +30,6 @@ export class CountrySearchInputComponent {
     onSearch(searchValue: string){
         if(!searchValue) return;
 
-        this.value.emit(searchValue); 
+        this.value.emit(searchValue);
     }
 }

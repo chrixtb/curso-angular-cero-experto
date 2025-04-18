@@ -1,4 +1,4 @@
-import { Component, inject, resource, signal } from '@angular/core';
+import { Component, inject, linkedSignal, resource, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map, of } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { CountryListComponent } from "../../components/country-list/country-list
 import { CountrySearchInputComponent } from "../../components/country-search-input/country-search-input.component";
 import { CountryService } from '../../services/country.service';
 import { Country } from '../../interfaces/country.interface';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
     selector: 'app-by-capital-page',
@@ -15,19 +16,34 @@ import { Country } from '../../interfaces/country.interface';
 export class ByCapitalPageComponent {
 
     countryService = inject(CountryService);
+    activatedRoute = inject(ActivatedRoute);
+    router = inject(Router);
 
-    query = signal('');
+    queryParam = this.activatedRoute.snapshot.queryParamMap.get('query') ?? '';
+    query = linkedSignal( () => this.queryParam);
+
 
     countryResource = rxResource({
         request: () => ({ query: this.query()}),
         loader: ({ request }) => {
-            if(!request.query) return of([]);
+            console.log({query: request.query});
+
+            if(!request.query) {
+                this.router.navigate(['/country/by-capital']);
+                return of([]);
+            }
+
+            this.router.navigate(['/country/by-capital'], {
+                queryParams: {
+                    query: request.query
+                }
+            });
 
             return this.countryService.searchByCapital(request.query);
         },
     });
 
-    // Codigo con resources pero vamos a hacer otra impl con rxResource 
+    // Codigo con resources pero vamos a hacer otra impl con rxResource
     // que en vez de trabajar con promesas trabaja con observables
 
     // countryResource = resource({
@@ -40,7 +56,7 @@ export class ByCapitalPageComponent {
     // });
 
     // Se va a realizar una implementacion con los nuevos objetos resource de angular.
-    // De aqui para abajo seria la implementacion antigua. 
+    // De aqui para abajo seria la implementacion antigua.
 
     // isLoading = signal(false);
     // isError = signal<string|null>(null);

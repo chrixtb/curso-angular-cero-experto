@@ -1,11 +1,12 @@
 
-<country-search-input 
-    placeholder='Buscar por capital' 
+<country-search-input
+    placeholder='Buscar por capital'
     [debounceTime]="500"
     (value)="query.set($event)"
+    [initialValue]="query()"
 />
 
-<country-list 
+<country-list
     [countries]="countryResource.value() ?? []"
     [isLoading]="countryResource.isLoading()"
     [isEmpty]="countryResource.value()?.length === 0"
