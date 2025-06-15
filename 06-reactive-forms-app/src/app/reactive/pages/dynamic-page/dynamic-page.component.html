@@ -1,7 +1,7 @@
 <h2>Reactivos: <small> Dinámicos </small></h2>
 <hr>
 
-<form autocomplete="off" [formGroup]="myForm">
+<form autocomplete="off" [formGroup]="myForm" (ngSubmit)="onSubmit()">
 
     <!-- Nombre -->
     <div class="mb-3 row">
@@ -31,6 +31,7 @@
                     placeholder="Agregar favorito"
                     [formControl]="newFavorte"
                     (keydown.enter)="onAddFavorite()"
+                    (keydown.enter)="$event.preventDefault()"
                 />
 
                 <button class="btn btn-outline-primary"
@@ -77,8 +78,8 @@
         <div class="col-sm-12">
             <button type="submit"
                     class="btn btn-primary float-end"
-                    [disabled]="myForm.invalid"
                     >
+                    <!-- [disabled]="myForm.invalid" -->
                 Guardar
             </button>
         </div>

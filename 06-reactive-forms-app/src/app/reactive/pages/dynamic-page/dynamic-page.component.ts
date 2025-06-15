@@ -42,11 +42,12 @@ export class DynamicPageComponent {
   }
 
   onSubmit() {
-    if (this.myForm.invalid) return;
+    console.log('Form submitted:', this.myForm.value);
+
+    // if (this.myForm.invalid) return;
 
     this.myForm.markAllAsTouched();
 
-    // console.log('Form submitted:', this.myForm.value);
     // this.myForm.reset();
     // this.favoriteGames.clear();
   }
