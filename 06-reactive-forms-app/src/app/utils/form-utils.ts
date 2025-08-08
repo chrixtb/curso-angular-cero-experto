@@ -1,6 +1,11 @@
-import { FormArray, FormGroup, ValidationErrors } from "@angular/forms";
+import { AbstractControl, FormArray, FormGroup, ValidationErrors, ValidatorFn } from "@angular/forms";
 
 export class FormUtils { 
+    // Expresiones regulares
+    static namePattern = '^([a-zA-Z]+) ([a-zA-Z]+)$';
+    static emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
+    static notOnlySpacesPattern = '^[a-zA-Z0-9]+$';
+
     
     static isValidField(formGroup: FormGroup, fieldName: string): boolean | null {
         return !!formGroup.controls[fieldName].errors && formGroup.controls[fieldName].touched;
@@ -33,8 +38,26 @@ export class FormUtils {
                     return `El campo debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
                 case 'min':
                     return `El valor mínimo es ${errors['min'].min}`;
+                case 'email':
+                    return `El valor ingresado no es un correo electrónico`;
+                case 'pattern':
+                    if( errors['pattern'].requiredPatter === FormUtils.emailPattern) {
+                        return 'El valor ingresado no es un correo electrónico válido';
+                    }
+                    return 'Error de patrón contra expresión regular';
+                default:
+                    return `Error de validacion no controlado: ${key}`;
             }
         }
         return null;
+    }
+
+    static isFieldOneEqualFieldTwo(field1: string, field2: string): ValidatorFn {
+        return (formGroup : AbstractControl): ValidationErrors | null => {
+            const field1Value = formGroup.get(field1)?.value;
+            const field2Value = formGroup.get(field2)?.value;
+            
+            return field1Value === field2Value ? null : { 'fieldsMismatch': true };
+        }
     }
 }
