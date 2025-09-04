@@ -8,14 +8,14 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModu
   imports: [JsonPipe, ReactiveFormsModule],
   templateUrl: './register-page.component.html',
 })
-export class RegisterPageComponent { 
+export class RegisterPageComponent {
   private fb = inject(FormBuilder);
   formUtils = FormUtils;
-  
+
   myForm: FormGroup = this.fb.group({
     nombre: ['', [Validators.required, Validators.pattern(FormUtils.namePattern)]],
-    email: ['', [Validators.required,  Validators.pattern(FormUtils.emailPattern)], FormUtils.chackingServerResponse],
-    username: ['', [Validators.required, Validators.minLength(6), Validators.pattern(FormUtils.notOnlySpacesPattern)]],
+    email: ['', [Validators.required,  Validators.pattern(FormUtils.emailPattern)], FormUtils.checkingServerResponse],
+    username: ['', [Validators.required, Validators.minLength(6), Validators.pattern(FormUtils.notOnlySpacesPattern), FormUtils.notStrider]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     password2: ['', [Validators.required]],
   },
@@ -38,7 +38,7 @@ export class RegisterPageComponent {
     return (group : AbstractControl): ValidationErrors | null => {
       const passwordControl = group.get('password');
       const password2Control = group.get('password2');
-      
+
       // Si no existen los controles, o sus valores no son válidos, no hacemos nada.
       // Esto evita errores de "null" y permite que otros validadores actúen primero.
       if (!passwordControl || !password2Control || passwordControl.pristine || password2Control.pristine) {
