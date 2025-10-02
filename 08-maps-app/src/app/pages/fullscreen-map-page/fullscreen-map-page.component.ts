@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, JsonPipe } from '@angular/common';
 import { Padding } from './../../../../node_modules/@maplibre/maplibre-gl-style-spec/src/expression/types/padding';
 import { AfterViewInit, Component, effect, ElementRef, signal, viewChild } from '@angular/core';
 
@@ -7,7 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 @Component({
   selector: 'app-fullscreen-map-page',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, JsonPipe],
   templateUrl: './fullscreen-map-page.component.html',
   styles: `
     div {
@@ -35,6 +35,10 @@ export class FullscreenMapPageComponent implements AfterViewInit {
   map = signal<maplibregl.Map | null>(null);
 
   zoom = signal(14);
+  coordinates = signal({
+    lng: -74.5,
+    lat: 40
+  })
 
   zoomEffect = effect(() => {
     if( !this.map() ) return;
@@ -47,12 +51,12 @@ export class FullscreenMapPageComponent implements AfterViewInit {
     if( !this.divElement()) return;
 
     const element = this.divElement()!.nativeElement;
-    console.log({ element });
+    const {lat, lng} = this.coordinates();
     
     const map = new maplibregl.Map({
       container: element, // container id
       style: 'https://tiles.openfreemap.org/styles/bright', // style URL
-      center: [-74.5, 40], // starting position [lng, lat]
+      center: [lng, lat], // starting position [lng, lat]
       zoom: this.zoom() // starting zoom
     }); 
 
@@ -65,6 +69,19 @@ export class FullscreenMapPageComponent implements AfterViewInit {
       const newZoom = event.target.getZoom();
       this.zoom.set( newZoom );
     });
+
+    map.on('moveend', () => {
+      const center = map.getCenter();
+      this.coordinates.set(center);
+    });
+
+     map.on('load', () => {
+      console.log('Map loaded');
+    });
+
+    map.addControl(new maplibregl.FullscreenControl());
+    map.addControl(new maplibregl.NavigationControl());
+    map.addControl(new maplibregl.ScaleControl());
 
     this.map.set(map);
   }
