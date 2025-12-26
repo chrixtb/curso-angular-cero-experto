@@ -1,6 +1,6 @@
 import { Component, ElementRef, input, signal, viewChild } from '@angular/core';
 
-import maplibregl, { LngLatLike } from 'maplibre-gl';
+import maplibregl, { LngLat, LngLatLike } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 @Component({
@@ -8,36 +8,29 @@ import 'maplibre-gl/dist/maplibre-gl.css';
   imports: [],
   templateUrl: './mini-map.component.html',
 })
-export class MiniMapComponent { 
+export class MiniMapComponent {
 
   divElement = viewChild<ElementRef>('map');
   map = signal<maplibregl.Map | null>(null);
 
-  //c = input.required<string>();
+  coordinates = input.required<{ lng: number; lat: number }>();
+  zoom = input<number>(14);
 
-  coordinates = signal({
-    lng: -74.5,
-    lat: 40
-  })
+  async ngAfterViewInit() {
+    if( !this.divElement()) return;
 
+    const element = this.divElement()!.nativeElement;
+    const {lat, lng} = this.coordinates();
 
-  // width: 
-  // height: 260
+    const map = new maplibregl.Map({
+      container: element, // container id
+      style: 'https://tiles.openfreemap.org/styles/bright', // style URL
+      center: [lng, lat], // starting position [lng, lat]
+      zoom: this.zoom(), // starting zoom
+      interactive: false,
+    });
 
-   async ngAfterViewInit() {
-      if( !this.divElement()) return;
-  
-      const element = this.divElement()!.nativeElement;
-      const {lat, lng} = this.coordinates();
-      
-      const map = new maplibregl.Map({
-        container: element, // container id
-        style: 'https://tiles.openfreemap.org/styles/bright', // style URL
-        center: [lng, lat], // starting position [lng, lat]
-        zoom: 14 // starting zoom
-      }); 
-
-      this.map.set(map);
-    }
+    this.map.set(map);
+  }
 
 }

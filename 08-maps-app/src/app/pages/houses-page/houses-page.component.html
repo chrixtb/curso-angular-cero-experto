@@ -7,9 +7,9 @@
 
 <section class="px-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
     @for (house of houses(); track house.id; let i = $index) {
-        <div class="card bg-base-100  shadow-xl">
-            
-            <app-mini-map></app-mini-map>
+        <div class="card bg-base-100 shadow-xl rounded-t-md overflow-hidden">
+
+            <app-mini-map [coordinates]=house.lngLat></app-mini-map>
 
             <div class="card-body">
                 <h2 class="card-title">
